@@ -19,7 +19,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'changePassword']);
 
     // Admin User CRUD
-    Route::apiResource('users', UserController::class);
+    
+    Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users/{user}', [UserController::class, 'show']);
+    Route::put('/users/{user}', [UserController::class, 'update']);
+    Route::post('/users', [UserController::class, 'store'])->middleware(\App\Http\Middleware\EnsureAdmin::class);
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->middleware(\App\Http\Middleware\EnsureAdmin::class);
 
     // Reports
     Route::apiResource('reports', ReportController::class);
