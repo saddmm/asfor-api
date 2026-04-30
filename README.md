@@ -299,7 +299,7 @@ php artisan test --coverage
 
 Akses Swagger UI di:
 ```
-http://localhost:8000/api/docs
+http://localhost:8000/docs
 ```
 
 File dokumentasi Swagger tersedia di:
