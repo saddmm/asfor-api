@@ -30,4 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // Finances
     Route::get('finances/summary', [FinanceController::class, 'summary']);
     Route::apiResource('finances', FinanceController::class);
+
+    // Labs & Inventory
+    Route::get('inventory-users', [\App\Http\Controllers\Api\LabController::class, 'getInventoryUsers']);
+    Route::post('labs/{lab}/assign-pics', [\App\Http\Controllers\Api\LabController::class, 'assignPics']);
+    Route::apiResource('labs', \App\Http\Controllers\Api\LabController::class)->only(['index', 'show']);
+    Route::apiResource('labs.items', \App\Http\Controllers\Api\InventoryItemController::class)->only(['store', 'update', 'destroy']);
 });

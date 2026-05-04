@@ -77,5 +77,8 @@ class DatabaseSeeder extends Seeder
                 'percentage' => null
             ]);
         }
+
+        // Labs
+        $this->call(LabSeeder::class);
     }
 }
