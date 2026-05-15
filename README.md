@@ -218,13 +218,6 @@ php artisan storage:link
 ```
 
 ---
-## Dokumentasi API
-
-Akses Swagger UI di:
-```
-http://localhost:8000/api/docs
-```
----
 
 ## 🤝 Kontribusi
 
