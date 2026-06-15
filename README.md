@@ -118,7 +118,7 @@ RESTful API profesional untuk sistem manajemen **ASFOR (Asosiasi Forum)**. Dilen
 ### 🗳️ Elections (Pemilihan Ketua)
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/elections` | Lihat status pemilihan aktif |
+| `GET` | `/api/elections/current` | Lihat status pemilihan aktif |
 | `POST` | `/api/elections` | Buat pemilihan baru (Admin) |
 | `POST` | `/api/elections/{id}/vote` | Memberikan suara / voting |
 | `PATCH` | `/api/elections/{id}/end` | Akhiri pemilihan (Admin) |

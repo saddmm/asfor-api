@@ -35,7 +35,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => ['required', Rule::in(['admin', 'user'])],
-            'division' => ['nullable', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha'])],
+            'division' => ['nullable', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha', 'Badan Pengurus Harian', 'Semua Divisi'])],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -65,7 +65,7 @@ class UserController extends Controller
             'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
             'password' => 'sometimes|required|string|min:8',
             'role' => ['sometimes', 'required', Rule::in(['admin', 'user'])],
-            'division' => ['nullable', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha'])],
+            'division' => ['nullable', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha', 'Badan Pengurus Harian', 'Semua Divisi'])],
         ]);
 
         if (isset($validated['password'])) {
@@ -89,5 +89,15 @@ class UserController extends Controller
         $this->authorizeAdmin($request->user());
         $user->delete();
         return response()->json(null, 204);
+    }
+
+    public function resetPassword(Request $request, User $user)
+    {
+        $this->authorizeAdmin($request->user());
+        
+        $user->password = Hash::make('password');
+        $user->save();
+        
+        return $this->successResponse($user, 'Password reset to default (password)');
     }
 }

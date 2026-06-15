@@ -45,11 +45,11 @@ class ReportController extends Controller
     {
         $validated = $request->validate([
             'title'      => 'required|string|max:255',
-            'division'   => ['required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha'])],
+            'division'   => ['required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha', 'Badan Pengurus Harian', 'Semua Divisi'])],
             'date'       => 'required|date',
             'budget'     => 'required|numeric',
             'description'=> 'nullable|string',
-            'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,png,jpeg|max:10240',
             'status'     => 'nullable|string',
         ]);
 
@@ -60,6 +60,8 @@ class ReportController extends Controller
         if ($request->hasFile('attachment')) {
             $validated['attachment'] = $request->file('attachment')->store('attachments', 'public');
         }
+
+        $validated['submitted_by'] = $request->user()->name;
 
         $report = Report::create($validated);
         $creator = $request->user();
@@ -106,11 +108,11 @@ class ReportController extends Controller
 
         $validated = $request->validate([
             'title'      => 'sometimes|required|string|max:255',
-            'division'   => ['sometimes', 'required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha'])],
+            'division'   => ['sometimes', 'required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha', 'Badan Pengurus Harian', 'Semua Divisi'])],
             'date'       => 'sometimes|required|date',
             'budget'     => 'sometimes|required|numeric',
             'description'=> 'nullable|string',
-            'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,png,jpeg|max:2048',
+            'attachment' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,png,jpeg|max:10240',
             'status'     => 'sometimes|required|string',
         ]);
 
