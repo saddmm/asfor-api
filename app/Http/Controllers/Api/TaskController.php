@@ -49,7 +49,7 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
-            'division' => ['required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha'])],
+            'division' => ['required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha', 'Badan Pengurus Harian', 'Semua Divisi'])],
             'priority' => 'required|string',
             'status' => 'nullable|string',
         ]);
@@ -88,7 +88,7 @@ class TaskController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'sometimes|required|exists:users,id',
-            'division' => ['sometimes', 'required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha'])],
+            'division' => ['sometimes', 'required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha', 'Badan Pengurus Harian', 'Semua Divisi'])],
             'priority' => 'sometimes|required|string',
             'status' => 'sometimes|required|string',
         ]);
