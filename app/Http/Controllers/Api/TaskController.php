@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\ApiResponse;
 use App\Models\Task;
+use App\Models\AppNotification;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -48,7 +49,7 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
-            'division' => ['required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha'])],
+            'division' => ['required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha', 'Badan Pengurus Harian', 'Semua Divisi'])],
             'priority' => 'required|string',
             'status' => 'nullable|string',
         ]);
@@ -60,6 +61,15 @@ class TaskController extends Controller
         $validated['assigned_by'] = $request->user()->id;
 
         $task = Task::create($validated);
+
+        // Notify the assigned user
+        AppNotification::notify(
+            $validated['assigned_to'],
+            'task',
+            '📋 Tugas Baru Ditugaskan',
+            'Anda mendapat tugas baru: "' . $task->title . '" dari ' . $request->user()->name,
+            ['task_id' => $task->id]
+        );
 
         return $this->successResponse($task->load(['assignedTo', 'assignedBy']), 'Task created successfully', 201);
     }
@@ -78,7 +88,7 @@ class TaskController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'sometimes|required|exists:users,id',
-            'division' => ['sometimes', 'required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha'])],
+            'division' => ['sometimes', 'required', Rule::in(['Hubungan Masyarakat', 'IT Support', 'Pemrograman', 'Training', 'Bidang Usaha', 'Badan Pengurus Harian', 'Semua Divisi'])],
             'priority' => 'sometimes|required|string',
             'status' => 'sometimes|required|string',
         ]);
@@ -87,9 +97,44 @@ class TaskController extends Controller
             return $this->errorResponse('Anda tidak bisa mengubah task ke divisi lain.', 403);
         }
 
+        $oldStatus     = $task->status;
+        $oldAssignedTo = $task->assigned_to;
         $task->update($validated);
+        $task->load(['assignedTo', 'assignedBy']);
 
-        return $this->successResponse($task->load(['assignedTo', 'assignedBy']), 'Task updated successfully');
+        $actor = $request->user();
+
+        // Notif 1: Perubahan status → beritahu assigner (jika bukan diri sendiri)
+        if (isset($validated['status']) && $validated['status'] !== $oldStatus) {
+            $assignedById = $task->assigned_by;
+            if ($assignedById && $assignedById !== $actor->id) {
+                $statusLabel = match($validated['status']) {
+                    'done'       => '✅ Selesai',
+                    'inProgress' => '🔄 Sedang Dikerjakan',
+                    default      => '📋 Kembali ke To Do',
+                };
+                AppNotification::notify(
+                    $assignedById,
+                    'task_status',
+                    'Update Tugas: ' . $task->title,
+                    $actor->name . ' memperbarui status tugas "' . $task->title . '" menjadi ' . $statusLabel . '.',
+                    ['task_id' => $task->id]
+                );
+            }
+        }
+
+        // Notif 2: Reassignment → beritahu orang yang baru ditugaskan (jika berubah & bukan diri sendiri)
+        if (isset($validated['assigned_to']) && (int)$validated['assigned_to'] !== (int)$oldAssignedTo && (int)$validated['assigned_to'] !== $actor->id) {
+            AppNotification::notify(
+                $validated['assigned_to'],
+                'task',
+                '📋 Tugas Ditugaskan Ulang',
+                $actor->name . ' menugaskan tugas "' . $task->title . '" kepada Anda.',
+                ['task_id' => $task->id]
+            );
+        }
+
+        return $this->successResponse($task, 'Task updated successfully');
     }
 
     public function destroy(Request $request, Task $task)
